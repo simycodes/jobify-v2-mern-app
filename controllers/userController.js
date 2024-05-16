@@ -1,9 +1,8 @@
 import { StatusCodes } from "http-status-codes";
 import cloudinary from "cloudinary";
-import { promises as fs } from "fs";
 import User from "../models/UserModel.js";
 import Job from "../models/JobModel.js";
-
+import { formatImage } from "../middleware/multerMiddleware.js";
 
 export const getCurrentUser = async(req, res) => {
     const user = await User.findOne({ _id: req.user.userId });
@@ -29,8 +28,8 @@ export const updateUser = async (req, res) => {
 
     // Check if avatar/user profile image is being changed/was uploaded
     if(req.file) {
-        const response = await cloudinary.v2.uploader.upload(req.file.path);
-        await fs.unlink(req.file.path); // delete file on server if upload to cloudinary is successful
+        const file = formatImage(req.file);
+        const response = await cloudinary.v2.uploader.upload(file);
         updatedUser.avatar = response.secure_url;
         updatedUser.avatarPublicId = response.public_id;
     }
