@@ -37,7 +37,7 @@ cloudinary.config({
 // syntax used when dealing ES6 modules when use of __dirname is needed, common js does not need such when dealing with __dirname
 const __dirname = dirname(fileURLToPath(import.meta.url));
 // Connecting to the public folder where uploaded images will be stored
-app.use(express.static(path.resolve(__dirname, "./public")));
+app.use(express.static(path.resolve(__dirname, "./client/dist")));
 
 // Enable receiving of cookies in server placed in the request headers
 app.use(cookieParser());
@@ -60,10 +60,11 @@ app.use("/api/v1/jobs", authenticateUser, jobsRouter);
 
 // Handling all front end requests - must be placed here after all server routes and before
 // the route/resource error route, else there will be errors
-// This also makes sure the client production app folder inside public folder gets 
-// connected to this server.All react clients requests are correctly handled by the server
+// This also makes sure the client production app folder inside dist(used public first) 
+// folder gets connected to this server and all react clients requests are correctly 
+// handled by the server
 app.get("*", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "./public", "index.html"));
+  res.sendFile(path.resolve(__dirname, "./client/dist", "index.html"));
 });
 
 // Resource/route Not Found Middleware - If user tries accessing a route not defined
