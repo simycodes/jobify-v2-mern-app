@@ -12,3 +12,4 @@ export { default as SubmitBtn } from "./SubmitBtn.jsx";
 export { default as ChartsContainer } from "./ChartsContainer.jsx";
 export { default as StatsContainer } from "./StatsContainer.jsx";
 export { default as ProfilePictureHolderItem } from "./ProfilePictureHolderItem.jsx";
+export { default as Loading } from "./Loading.jsx";
