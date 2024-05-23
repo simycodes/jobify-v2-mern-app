@@ -1,12 +1,12 @@
 import { FormRow } from "../components";
 import Wrapper from "../assets/wrappers/DashboardFormPage";
-import { useOutletContext } from "react-router-dom";
+import { redirect, useOutletContext } from "react-router-dom";
 import { useNavigation, Form } from "react-router-dom";
 import customFetch from "../utils/customFetch";
 import { toast } from "react-toastify";
 import ProfilePictureHolderItem from "../components/ProfilePictureHolderItem";
 
-export const profileAction = async ({ request }) => {
+export const profileAction = (queryClient) => async ({ request }) => {
   // Since image is also being sent to the server, form data does not need to be changed
   // into json data before sending to server. Data needs to be sent in formData format directly
   const formData = await request.formData(); 
@@ -20,11 +20,13 @@ export const profileAction = async ({ request }) => {
 
   try {
     await customFetch.patch("/users/update-user", formData);
-    toast.success("Profile updated successfully");
+    queryClient.invalidateQueries(['user']);
+    toast.success("Profile updated Successfully");
+    return redirect('/dashboard');
   } catch (error) {
     toast.error(error?.response?.data?.msg);
+    return null
   }
-  return null;
 };
 
 const Profile = () => {

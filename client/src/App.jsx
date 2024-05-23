@@ -1,4 +1,7 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+
 import {
   HomeLayout,
   Landing,
@@ -16,6 +19,7 @@ import {
   ConfirmDeleteJob
 } from "./pages";
 
+// Page Actions and Loaders
 import { registerAction } from "./pages/Register";
 import { loginAction } from "./pages/Login";
 import { addJobAction } from "./pages/AddJob";
@@ -23,6 +27,8 @@ import { editJobAction } from "./pages/EditJob";
 import { profileAction } from "./pages/Profile";
 import { deleteJobAction } from "./pages/DeleteJob";
 import { confirmDeleteJobAction } from "./pages/ConfirmDeleteJob";
+// import { viewJobAction } from "./pages/ViewJob";
+
 import { DashboardLayoutLoader } from "./pages/DashboardLayout";
 import { allJobsLoader } from "./pages/AllJobs";
 import { editJobLoader } from "./pages/EditJob";
@@ -30,6 +36,7 @@ import { viewJobLoader } from "./pages/ViewJob";
 import { confirmDeleteJobLoader } from "./pages/ConfirmDeleteJob";
 import { adminLoader } from "./pages/Admin";
 import { statsLoader } from "./pages/Stats";
+import ErrorElement from "./components/ErrorElement";
 
 // CHECKING THE APP THEME WHEN WEB APP IS FIRST ACCESSED
 export const checkDefaultTheme = () => {
@@ -40,6 +47,15 @@ export const checkDefaultTheme = () => {
   // same as: isDarkTheme? document.body.add("dark-theme"): document.body.remove("dark-theme");
 };
 checkDefaultTheme(); // Change to dark-theme if it is enabled on app initial load
+
+// Setting how long is query will be valid using react-query
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    },
+  },
+});
 
 // WEB APP ROUTING
 let router = createBrowserRouter([
@@ -60,32 +76,34 @@ let router = createBrowserRouter([
       {
         path: "/login",
         element: <Login />,
-        action: loginAction,
+        action: loginAction(queryClient),
       },
       {
         path: "/dashboard",
-        element: <DashboardLayout />,
-        loader: DashboardLayoutLoader, // loader helps get data from the server
+        element: <DashboardLayout queryClient={queryClient} />,
+        loader: DashboardLayoutLoader(queryClient), // loader helps get data from the server
         children: [
           {
             index: true,
             element: <AddJob />,
-            action: addJobAction,
+            action: addJobAction(queryClient),
           },
           {
             path: "stats", // gran-children element path do not have /, else errors
             element: <Stats />,
-            loader: statsLoader
+            loader: statsLoader(queryClient), // passing queryClient to statsLoader on Stats.jsx page
+            errorElement: <ErrorElement />,
           },
           {
             path: "all-jobs",
             element: <AllJobs />,
-            loader: allJobsLoader,
+            loader: allJobsLoader(queryClient),
+            errorElement: <ErrorElement />,
           },
           {
             path: "profile",
             element: <Profile />,
-            action: profileAction,
+            action: profileAction(queryClient),
           },
           {
             path: "admin",
@@ -95,17 +113,18 @@ let router = createBrowserRouter([
           {
             path: "edit-job/:id",
             element: <EditJob />,
-            loader: editJobLoader,
-            action: editJobAction,
+            loader: editJobLoader(queryClient),
+            action: editJobAction(queryClient),
           },
           {
             path: "delete-job/:id",
-            action: deleteJobAction,
+            action: deleteJobAction(queryClient),
           },
           {
             path: "view-job/:id",
             element: <ViewJob />,
             loader: viewJobLoader,
+            // action: viewJobAction(queryClient),
           },
           {
             path: "confirm-delete-job/:id",
@@ -120,6 +139,11 @@ let router = createBrowserRouter([
 ]);
 
 const App = () => {
-  return <RouterProvider router={router} />;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+      <ReactQueryDevtools initialIsOpen={false}/>
+    </QueryClientProvider>
+  ); 
 };
 export default App;

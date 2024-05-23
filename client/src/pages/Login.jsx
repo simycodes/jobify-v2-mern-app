@@ -8,12 +8,13 @@ import { toast } from "react-toastify";
 
 // This function handles react router dom form submissions - this function is initialized
 // to the action property in the app router - formAPI (formData()) is used to get form data
-export const loginAction = async ({ request }) => {
+export const loginAction = (queryClient) => async ({ request }) => {
   const formData = await request.formData();
   const data = Object.fromEntries(formData); // convert arrays of arrays into json
   // console.log(data);
   try {
     await axios.post("/api/v1/auth/login", data); // await customFetch.post("/auth/login", data);
+    queryClient.invalidateQueries(); // remove cached user data to allow new user to login correctly
     toast.success("Login Successful");
     return redirect("/dashboard"); // redirect recommended to be used only inside action functions
   } catch (error) {

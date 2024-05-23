@@ -6,12 +6,13 @@ import { Form, redirect } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios"; // import customFetch from "../utils/customFetch";
 
-export const addJobAction = async ({ request }) => {
+export const addJobAction = (queryClient) => async ({ request }) => {
   const formData = await request.formData();
   const data = Object.fromEntries(formData);
 
   try {
     await axios.post("/api/v1/jobs", data); // await customFetch.post("/jobs", data);
+    queryClient.invalidateQueries(["jobs"]);
     toast.success("Job added successfully");
     return redirect("all-jobs");
   } catch (error) {

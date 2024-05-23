@@ -4,28 +4,40 @@ import { useLoaderData } from "react-router-dom";
 import { JOB_STATUS, JOB_TYPE } from "../../../utils/constants";
 import { Form, redirect } from "react-router-dom";
 import { toast } from "react-toastify";
-import axios from "axios";
 import customFetch from "../utils/customFetch";
+import { useQuery } from "@tanstack/react-query";
 
-// Loader to get the single job to edit
-export const editJobLoader = async ({ params }) => {
-  try {
-    const { data } = await axios.get(`/api/v1/jobs/${params.id}`);
-    // console.log(data);
-    return data;
-  } catch (error) {
-    toast.error(error?.response.data.msg);
-    return redirect("/dashboard/all-jobs");
-  }
+const singleJobQuery = (id) => {
+  return {
+    queryKey: ["job", id],
+    queryFn: async () => {
+      const { data } = await customFetch.get(`/jobs/${id}`);
+      return data;
+    },
+  };
 };
 
+// Loader to get the single job to edit
+export const editJobLoader = (queryClient) => async ({ params }) => {
+    try {
+      await queryClient.ensureQueryData(singleJobQuery(params.id));
+      // console.log(params.id);
+      return params.id;
+    } catch (error) {
+      toast.error(error?.response?.data?.msg);
+      return redirect("/dashboard/all-jobs");
+    }
+  };
+
 // Action to update a single job
-export const editJobAction = async ({ request, params }) => {
+export const editJobAction = (queryClient) => async ({ request, params }) => {
   const formData = await request.formData();
   const data = Object.fromEntries(formData);
 
   try {
     await customFetch.patch(`/jobs/${params.id}`, data);
+    queryClient.invalidateQueries(["jobs"]);
+    queryClient.invalidateQueries(["job"]);
     toast.success("Job edited successfully");
     // return redirect("/dashboard/all-jobs");
     return redirect(`../view-job/${params.id}`);
@@ -37,7 +49,8 @@ export const editJobAction = async ({ request, params }) => {
 };
 
 const EditJob = () => {
-  const { job } = useLoaderData();
+  const id = useLoaderData();
+  const { data: { job } } = useQuery(singleJobQuery(id));
   // console.log(job);
 
   return (

@@ -4,8 +4,10 @@ import { useLoaderData } from "react-router-dom";
 import { JOB_STATUS, JOB_TYPE } from "../../../utils/constants";
 import { Form, redirect, Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import axios from "axios";
+// import customFetch from "../utils/customFetch";
+// import { useQuery } from "@tanstack/react-query";
 
+import axios from "axios";
 
 // Loader to get the single job to edit
 export const viewJobLoader = async ({ params }) => {
@@ -18,14 +20,6 @@ export const viewJobLoader = async ({ params }) => {
     return redirect("/dashboard/all-jobs");
   }
 };
-
-// const goToEditJob = ({ params }) => {
-//   return redirect(`/dashboard/edit-job/${params.id}`);
-// };
-
-// const goToDeleteJob = () => {
-
-// }
 
 
 const ViewJob = () => {
@@ -74,14 +68,19 @@ const ViewJob = () => {
             disabled={true}
           />
 
-          <Link to={`../edit-job/${job._id}`} className="btn btn-block form-btn">
+          <Link
+            to={`../edit-job/${job._id}`}
+            className="btn btn-block form-btn"
+          >
             Edit
           </Link>
 
-          <Link to={`../confirm-delete-job/${job._id}`} className="btn btn-block form-btn">
+          <Link
+            to={`../confirm-delete-job/${job._id}`}
+            className="btn btn-block form-btn"
+          >
             Delete
           </Link>
-
         </div>
       </Form>
     </Wrapper>

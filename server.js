@@ -8,6 +8,10 @@ import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import cloudinary from "cloudinary";
 
+// Security Packages
+import helmet from "helmet";
+import mongoSanitize from "express-mongo-sanitize";
+
 // Routers
 import jobsRouter from "./routes/jobRouter.js";
 import authRouter from "./routes/authRouter.js";
@@ -43,11 +47,9 @@ app.use(express.static(path.resolve(__dirname, "./client/dist")));
 app.use(cookieParser());
 // Enable receiving data in JSON format from front-end/client
 app.use(express.json());
-
-// Server home route
-app.get("/", (req, res) => {
-  res.send("Server Home route - Hello There!");
-});
+// Adding security middlewares
+app.use(helmet()); // sets security HTTP headers to avoid potential security threats, such as cross-site scripting (XSS) attacks
+app.use(mongoSanitize()); // sanitizes incoming user data to avoid NoSQL injection database attacks
 
 // All auth routes requests
 app.use("/api/v1/auth", authRouter);
